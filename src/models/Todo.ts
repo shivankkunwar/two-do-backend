@@ -7,6 +7,7 @@ export interface ITodo extends Document{
     status: "pending" | "completed",
     createdAt: Date,
     updatedAt: Date,
+    dueDate?: Date,
 }
 
 
@@ -18,7 +19,9 @@ const TodoSchema : Schema<ITodo> = new Schema ({
         type: String,
         enum: ["pending", "completed"],
         default: "pending"
-    }},
+    },
+    dueDate: { type: Date },
+    },
     {timestamps :true}
 )
 
