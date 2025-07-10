@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./db/mongo";
-
+import todoRouter from "./routes/todo.routes"
 import authRouter from "./routes/auth.routes";
 import userRouter from "./routes/user.routes";
 
@@ -23,7 +23,7 @@ connectDB()
 // mount routers
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
-
+app.use("/api/todos",todoRouter)
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
