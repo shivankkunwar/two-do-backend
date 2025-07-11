@@ -18,7 +18,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || "*", credentials: true }));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+
+// Rate limiting - more lenient in development
+const authLimiter = rateLimit({ 
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 5 : 50, // 5 login attempts in prod, 50 in dev
+  message: { error: "Too many login attempts, please try again later." }
+});
+
+const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: process.env.NODE_ENV === 'production' ? 10 : 100, // 10 refresh attempts per minute in prod, 100 in dev
+  message: { error: "Too many refresh attempts, please try again later." }
+});
 
 // connect to DB first
 connectDB()
@@ -27,6 +39,11 @@ connectDB()
     console.error("DB connection failed", err);
     process.exit(1);
   });
+
+// Apply rate limiting to specific auth routes
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/refresh", refreshLimiter);
 
 // mount routers
 app.use("/api/auth", authRouter);

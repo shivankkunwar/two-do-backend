@@ -5,7 +5,7 @@ import TokenBlacklist from "../models/TokenBlacklist";
 import { User } from "../models/User";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "secret";
-const ACCESS_TTL = "15m";
+const ACCESS_TTL = process.env.NODE_ENV === 'production' ? "15m" : "24h"; // Longer in dev
 const REFRESH_TTL = "7d";
 
 const setRefreshCookie = (res: Response, token: string) => {
@@ -37,7 +37,10 @@ export const register = async (req: Request, res: Response) => {
 
     setRefreshCookie(res, refreshToken);
 
-    res.status(201).json({ token: accessToken });
+    res.status(201).json({ 
+      token: accessToken,
+      user: { email: newUser.email, userName: newUser.username }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal error" });
@@ -62,7 +65,10 @@ export const login = async (req: Request, res: Response) => {
     });
     setRefreshCookie(res, refreshToken);
 
-    res.json({ token: accessToken });
+    res.json({ 
+      token: accessToken,
+      user: { email: user.email, userName: user.username }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal error" });
