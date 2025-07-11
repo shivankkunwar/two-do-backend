@@ -41,13 +41,13 @@ if (process.env.NODE_ENV === "production") {
 const authLimiter = rateLimit({ 
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: process.env.NODE_ENV === 'production' ? 5 : 50, // 5 login attempts in prod, 50 in dev
-  message: { error: "Too many login attempts, please try again later." }
+  message: "Too many login attempts, please try again later."
 });
 
 const refreshLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: process.env.NODE_ENV === 'production' ? 10 : 100, // 10 refresh attempts per minute in prod, 100 in dev
-  message: { error: "Too many refresh attempts, please try again later." }
+  message: "Too many refresh attempts, please try again later."
 });
 
 // connect to DB first
