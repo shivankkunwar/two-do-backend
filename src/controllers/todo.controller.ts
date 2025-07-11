@@ -7,12 +7,14 @@ type AuthReq = Request & { userId: string };
 
 export const createTodo = async (req: AuthReq, res: Response) => {
   try {
-    const { title, description, status } = req.body;
+    const { title, description, status, dueDate } = req.body;
     const todo = new Todo({
       owner: req.userId,
       title,
       description,
       status,
+      // only set if provided and non-empty
+      ...(dueDate ? { dueDate } : {}),
     });
     await todo.save();
     res.status(201).json({ data: todo });
@@ -51,11 +53,20 @@ export const updateTodo = async (req: AuthReq, res: Response)=>{
         if(!checkOwner(todo.owner, req.userId, res)) return;
 
         const { title, description, status} = req.body;
+        const { dueDate } = req.body;
 
         if(title !== undefined ) todo.title = title;
         if(description!=undefined) todo.description=description;
         if(status === 'pending' || status === "completed")
             todo.status = status
+        if(dueDate !== undefined){
+            // allow clearing date by empty string or null
+            if(dueDate){
+                todo.dueDate = dueDate;
+            }else{
+                todo.dueDate = undefined as any; // remove field
+            }
+        }
 
         await todo.save()
         res.json({data: todo})

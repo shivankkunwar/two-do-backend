@@ -17,7 +17,25 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors({ origin: process.env.FRONTEND_URL || "*", credentials: true }));
+
+// CORS configuration for development - allow both localhost and IP addresses
+if (process.env.NODE_ENV === "production") {
+  // strict in prod
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL,  // single allowed origin
+      credentials: true,
+    })
+  );
+} else {
+  // super-simple in dev
+  app.use(
+    cors({
+      origin: true,         // reflect request origin
+      credentials: true,
+    })
+  );
+}
 
 // Rate limiting - more lenient in development
 const authLimiter = rateLimit({ 
@@ -53,6 +71,6 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
